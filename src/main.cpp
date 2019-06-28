@@ -25,6 +25,7 @@ int main(int argc, char **argv){
 	
 	// Parser file
 	program = Parser::parser(&input);
+	program->prettyPrinter();
 	
 	return 0;
 }

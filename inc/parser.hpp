@@ -8,6 +8,7 @@ class Parser {
 	private:
 	static Instruction *matchInstruction(string, SymbolTable&);
 	static ContentOf *matchContentOf(string, SymbolTable&);
+	static AccessSize matchAccessSize(string);
 	static Expression *matchExpression(string, SymbolTable&);
 	static Register *matchRegister(string);
 	static Integer *matchInteger(string);

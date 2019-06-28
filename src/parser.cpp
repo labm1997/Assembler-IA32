@@ -10,7 +10,8 @@ Program *Parser::parser(ifstream *input){
 	for(int lineNumber = 1 ; getline(*input, line) ; lineNumber++){
 		Instruction *lineInstruction;
 		lineInstruction = Parser::matchInstruction(line, symbolTable);
-		statements.push_back(lineInstruction);
+		if(lineInstruction != nullptr)
+		    statements.push_back(lineInstruction);
 	}
 
 	return new Program(statements, symbolTable);
@@ -18,7 +19,7 @@ Program *Parser::parser(ifstream *input){
 
 Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
 	Instruction *ret = nullptr;
-	regex re1("(?:(\\w*):\\s)?(\\w*) (\\[?\\w*\\]?),(\\[?\\w*\\]?)");
+	regex re1("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*\\]?),(\\[?\\w*\\]?)");
 	smatch match;
 
 	if(regex_search(line, match, re1)){
@@ -27,9 +28,10 @@ Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
 
 		string instruction = match.str(2);
 		if(instruction == "add"){
-		    Expression *lhs = Parser::matchExpression(match.str(3), symbolTable);
-		    Expression *rhs = Parser::matchExpression(match.str(4), symbolTable);
-			ret = new AddInstruction(label, lhs, rhs);
+		    AccessSize accessSize = Parser::matchAccessSize(match.str(3));
+		    Expression *lhs = Parser::matchExpression(match.str(4), symbolTable);
+		    Expression *rhs = Parser::matchExpression(match.str(5), symbolTable);
+			ret = new AddInstruction(label, accessSize, lhs, rhs);
 			cout << "Add instruction found" << endl;
 		}
 		else {
@@ -58,6 +60,11 @@ Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
     if(label != nullptr) return label;
 
     return nullptr;
+}
+
+AccessSize Parser::matchAccessSize(string asstr){
+    if(asstr == "dword") return "dword";
+    return "";
 }
 
 ContentOf *Parser::matchContentOf(string cofstr, SymbolTable &symbolTable){
@@ -114,7 +121,7 @@ Label *Parser::matchLabel(string labelstr, SymbolTable &symbolTable){
     if(regex_match(labelstr, re)){
 
         // Add label to symbol table
-        if(symbolTable.count(labelstr) == 0){
+        if(labelstr != "" && symbolTable.count(labelstr) == 0){
             Label *label = new Label(labelstr);
             symbolTable[labelstr] = label;
             return label;

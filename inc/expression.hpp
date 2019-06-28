@@ -6,13 +6,14 @@
 using namespace std;
 
 class Expression {
-
+	public:
+	virtual void prettyPrinter() = 0;
 };
 
 // Defines class for Expression+Expression on AT&T IA32 Assembly
-class AddExpression : public Expression {
-
-};
+//class AddExpression : public Expression {
+//
+//};
 
 // Defines class for [Expression] on AT&T IA32 Assembly
 class ContentOf : public Expression {
@@ -20,6 +21,7 @@ class ContentOf : public Expression {
 	Expression *exp;
 	public:
 	ContentOf(Expression *);
+	void prettyPrinter();
 };
 
 // Defines class for a label that points to some memory address
@@ -30,6 +32,8 @@ class Label : public Expression {
 	public:
 	Label(string);
 	long int getAddress();
+	string getName();
+	void prettyPrinter();
 };
 
 // Defines class for an integer
@@ -39,6 +43,7 @@ class Integer : public Expression {
 
 	public:
 	Integer(long int);
+	void prettyPrinter();
 };
 
 // Defines class for a register
@@ -49,6 +54,7 @@ class Register : public Expression {
 	public:
 	Register(string);
 	string getName();
+	void prettyPrinter();
 };
 
 #endif
