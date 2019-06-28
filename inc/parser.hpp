@@ -6,6 +6,8 @@
 
 class Parser {
 	private:
+	static AddExpression *matchAddExpression(string, SymbolTable&);
+	static AtomicExpression *matchAtomicExpression(string, SymbolTable&);
 	static Instruction *matchInstruction(string, SymbolTable&);
 	static ContentOf *matchContentOf(string, SymbolTable&);
 	static AccessSize matchAccessSize(string);

@@ -19,20 +19,30 @@ Program *Parser::parser(ifstream *input){
 
 Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
 	Instruction *ret = nullptr;
-	regex re1("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*\\]?),(\\[?\\w*\\]?)");
+	regex binre("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*(?:\\+\\w*)?\\]?),(\\[?\\w*(?:\\+\\w*)?\\]?)");
 	smatch match;
 
-	if(regex_search(line, match, re1)){
+	if(regex_search(line, match, binre)){
 	    // Parse label
 	    Label *label = Parser::matchLabel(match.str(1), symbolTable);
 
+	    // Parse access size
+	    AccessSize accessSize = Parser::matchAccessSize(match.str(3));
+
+        // Instruction mnemonic
 		string instruction = match.str(2);
+
+		// LHS and RHS
+	    Expression *lhs = Parser::matchExpression(match.str(4), symbolTable);
+	    Expression *rhs = Parser::matchExpression(match.str(5), symbolTable);
+
 		if(instruction == "add"){
-		    AccessSize accessSize = Parser::matchAccessSize(match.str(3));
-		    Expression *lhs = Parser::matchExpression(match.str(4), symbolTable);
-		    Expression *rhs = Parser::matchExpression(match.str(5), symbolTable);
 			ret = new AddInstruction(label, accessSize, lhs, rhs);
 			cout << "Add instruction found" << endl;
+		}
+		else if(instruction == "mov"){
+			ret = new MovInstruction(label, accessSize, lhs, rhs);
+			cout << "Mov instruction found" << endl;
 		}
 		else {
 			cout << "Unsupported instruction " << instruction << endl;
@@ -47,6 +57,18 @@ Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
     ContentOf *cof = Parser::matchContentOf(expstr, symbolTable);
     if(cof != nullptr) return cof;
 
+    // Try to match an add expression
+    AddExpression *addexp = Parser::matchAddExpression(expstr, symbolTable);
+    if(addexp != nullptr) return addexp;
+
+    // Try to match an atomic expression (register, integer or label)
+    AtomicExpression *atexp = Parser::matchAtomicExpression(expstr, symbolTable);
+    if(atexp != nullptr) return atexp;
+
+    return nullptr;
+}
+
+AtomicExpression *Parser::matchAtomicExpression(string expstr, SymbolTable &symbolTable){
     // Try to match a register
     Register *reg = Parser::matchRegister(expstr);
     if(reg != nullptr) return reg;
@@ -62,14 +84,27 @@ Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
     return nullptr;
 }
 
+AddExpression *Parser::matchAddExpression(string aexp, SymbolTable &symbolTable){
+    regex re("^(\\w*)\\+(\\w*)$");
+    smatch match;
+
+    if(regex_search(aexp, match, re)){
+        AtomicExpression *lhs = Parser::matchAtomicExpression(match.str(1), symbolTable);
+        AtomicExpression *rhs = Parser::matchAtomicExpression(match.str(2), symbolTable);
+        return new AddExpression(lhs, rhs);
+    }
+    return nullptr;
+}
+
 AccessSize Parser::matchAccessSize(string asstr){
     if(asstr == "dword") return "dword";
     return "";
 }
 
 ContentOf *Parser::matchContentOf(string cofstr, SymbolTable &symbolTable){
-    regex re("^\\[(\\w*)\\]$");
+    regex re("^\\[(\\w*(?:\\+\\w*)?)\\]$");
     smatch match;
+
     if(regex_search(cofstr, match, re)){
         /* !FIXME: Only one content of is allowed,
          should we create a dedicated matchContentOfExpression */

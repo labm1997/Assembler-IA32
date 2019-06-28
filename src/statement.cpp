@@ -14,6 +14,10 @@ string AddInstruction::getObjectCode(){
 	return "";
 }
 
+string MovInstruction::getObjectCode(){
+	return "";
+}
+
 void Program::prettyPrinter(){
     for(auto it = this->statements.begin() ; it != this->statements.end() ; ++it){
         (*it)->prettyPrinter();

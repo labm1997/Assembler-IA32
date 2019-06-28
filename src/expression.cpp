@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+AddExpression::AddExpression(AtomicExpression *lhs, AtomicExpression *rhs) : lhs(lhs), rhs(rhs) {};
+
 ContentOf::ContentOf(Expression *exp) : exp(exp) {};
 
 Register::Register(string registerName) : registerName(registerName) {};
@@ -18,9 +20,15 @@ string Label::getName(){
     return this->label;
 }
 
+void AddExpression::prettyPrinter(){
+    if(this->lhs != nullptr) this->lhs->prettyPrinter();
+    cout << "+";
+    if(this->rhs != nullptr) this->rhs->prettyPrinter();
+}
+
 void ContentOf::prettyPrinter(){
     cout << "[";
-    this->exp->prettyPrinter();
+    if(this->exp != nullptr) this->exp->prettyPrinter();
     cout << "]";
 }
 

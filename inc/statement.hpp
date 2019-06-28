@@ -64,8 +64,12 @@ class AddInstruction : public BinaryInstruction {
 	string getName() { return "add"; };
 };
 
-class MovInstruction : public Instruction {
-
+class MovInstruction : public BinaryInstruction {
+	public:
+	// Inherits BinaryExpression constructor
+	using BinaryInstruction::BinaryInstruction;
+	string getObjectCode();
+	string getName() { return "mov"; };
 };
 
 
