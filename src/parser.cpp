@@ -3,64 +3,64 @@
 #include "parser.hpp"
 
 Program *Parser::parser(ifstream *input){
-	SymbolTable symbolTable;
-	list<Statement *> statements;
-	string line;
+    SymbolTable symbolTable;
+    list<Statement *> statements;
+    string line;
 
-	for(int lineNumber = 1 ; getline(*input, line) ; lineNumber++){
-		Instruction *lineInstruction;
-		lineInstruction = Parser::matchInstruction(line, symbolTable);
-		if(lineInstruction != nullptr)
-		    statements.push_back(lineInstruction);
-	}
+    for(int lineNumber = 1 ; getline(*input, line) ; lineNumber++){
+        Instruction *lineInstruction;
+        lineInstruction = Parser::matchInstruction(line, symbolTable);
+        if(lineInstruction != nullptr)
+            statements.push_back(lineInstruction);
+    }
 
-	return new Program(statements, symbolTable);
+    return new Program(statements, symbolTable);
 }
 
 Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
-	regex binre("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*(?:\\+\\w*)?\\]?)(?:,(\\[?\\w*(?:\\+\\w*)?\\]?))?");
-	smatch match;
+    regex binre("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*(?:\\+\\w*)?\\]?)(?:,(\\[?\\w*(?:\\+\\w*)?\\]?))?");
+    smatch match;
 
     // Try to parse a binary expression
-	if(regex_search(line, match, binre)){
-	    // Parse label
-	    Label *label = Parser::matchLabel(match.str(1), symbolTable);
+    if(regex_search(line, match, binre)){
+        // Parse label
+        Label *label = Parser::matchLabel(match.str(1), symbolTable);
 
-	    // Parse access size
-	    AccessSize accessSize = Parser::matchAccessSize(match.str(3));
+        // Parse access size
+        AccessSize accessSize = Parser::matchAccessSize(match.str(3));
 
         // Instruction mnemonic
-		string instruction = match.str(2);
+        string instruction = match.str(2);
 
-		// LHS
-	    Expression *lhs = Parser::matchExpression(match.str(4), symbolTable);
+        // LHS
+        Expression *lhs = Parser::matchExpression(match.str(4), symbolTable);
 
-	    // Binary expression
-	    if(!match.str(5).empty()){
-	        Expression *rhs = Parser::matchExpression(match.str(5), symbolTable);
+        // Binary expression
+        if(!match.str(5).empty()){
+            Expression *rhs = Parser::matchExpression(match.str(5), symbolTable);
 
-		    #define MatchBinInstruction(prefix, name)\
+            #define MatchBinInstruction(prefix, name)\
             if(instruction == name){\
-	            return new prefix##Instruction(label, accessSize, lhs, rhs);\
+                return new prefix##Instruction(label, accessSize, lhs, rhs);\
             }
             BinExpander(MatchBinInstruction)
         }
 
         // Unary Expression
         else {
-		    #define MatchUnInstruction(prefix, name)\
+            #define MatchUnInstruction(prefix, name)\
             if(instruction == name){\
-	            return new prefix##Instruction(label, accessSize, lhs);\
+                return new prefix##Instruction(label, accessSize, lhs);\
             }
             UnExpander(MatchUnInstruction)
         }
 
         // None
-		cout << "Unsupported instruction " << instruction << endl;
+        cout << "Unsupported instruction " << instruction << endl;
 
-	}
+    }
 
-	return nullptr;
+    return nullptr;
 }
 
 Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
@@ -137,29 +137,29 @@ Register *Parser::matchRegister(string regname){
 }
 
 Integer *Parser::matchInteger(string intstr){
-	char *c = (char *)intstr.c_str();
-	char *a = c;
-	bool hexa = false;
-	long int ret;
+    char *c = (char *)intstr.c_str();
+    char *a = c;
+    bool hexa = false;
+    long int ret;
 
-	if(*c == '\0') return nullptr;
+    if(*c == '\0') return nullptr;
 
-	if(*c == '-') c++;
-	// Hexa
-	if(*c == '0' && *(c+1) == 'x') {
-		hexa = true;
-		c = c+2;
-	}
+    if(*c == '-') c++;
+    // Hexa
+    if(*c == '0' && *(c+1) == 'x') {
+        hexa = true;
+        c = c+2;
+    }
 
-	while(*c != '\0'){
-		if(!((*c >= '0' && *c <= '9') || (hexa && (*c >= 'a' && *c <= 'f')) ))
-			return nullptr;
-		c++;
-	}
+    while(*c != '\0'){
+        if(!((*c >= '0' && *c <= '9') || (hexa && (*c >= 'a' && *c <= 'f')) ))
+            return nullptr;
+        c++;
+    }
 
-	ret = hexa ? strtol(a, NULL, 16) : strtol(a, NULL, 10);
+    ret = hexa ? strtol(a, NULL, 16) : strtol(a, NULL, 10);
 
-	return new Integer(ret);
+    return new Integer(ret);
 }
 
 Label *Parser::matchLabel(string labelstr, SymbolTable &symbolTable){
