@@ -6,22 +6,37 @@ Program::Program(StatementList statements, SymbolTable symbolTable) : statements
 BinaryInstruction::BinaryInstruction(Label *label, AccessSize accessSize, Expression *lhs, Expression *rhs) {
     this->label = label;
     this->indirectAccessSize = accessSize;
-    this->arguments.push_back(lhs);
-    this->arguments.push_back(rhs);
+    this->lhs = lhs;
+    this->rhs = rhs;
 };
 
-string AddInstruction::getObjectCode(){
-	return "";
-}
-
-string MovInstruction::getObjectCode(){
-	return "";
-}
+UnaryInstruction::UnaryInstruction(Label *label, AccessSize accessSize, Expression *exp) {
+    this->label = label;
+    this->indirectAccessSize = accessSize;
+    this->exp = exp;
+};
 
 void Program::prettyPrinter(){
     for(auto it = this->statements.begin() ; it != this->statements.end() ; ++it){
         (*it)->prettyPrinter();
     }
+}
+
+void UnaryInstruction::prettyPrinter(){
+    if(this->label)
+        cout << this->label->getName() << ": ";
+
+    cout << this->getName();
+
+    if(!this->indirectAccessSize.empty())
+        cout << " " << this->indirectAccessSize;
+
+    if(this->exp){
+        cout << " ";
+        this->exp->prettyPrinter();
+    }
+    cout << endl;
+
 }
 
 void BinaryInstruction::prettyPrinter(){
@@ -33,14 +48,14 @@ void BinaryInstruction::prettyPrinter(){
     if(!this->indirectAccessSize.empty())
         cout << " " << this->indirectAccessSize;
 
-    if(this->arguments[0]){
+    if(this->lhs){
         cout << " ";
-        this->arguments[0]->prettyPrinter();
+        this->lhs->prettyPrinter();
     }
 
-    if(this->arguments[1]){
+    if(this->rhs){
         cout << ",";
-        this->arguments[1]->prettyPrinter();
+        this->rhs->prettyPrinter();
     }
 
     cout << endl;

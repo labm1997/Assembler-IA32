@@ -18,10 +18,10 @@ Program *Parser::parser(ifstream *input){
 }
 
 Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
-	Instruction *ret = nullptr;
-	regex binre("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*(?:\\+\\w*)?\\]?),(\\[?\\w*(?:\\+\\w*)?\\]?)");
+	regex binre("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*(?:\\+\\w*)?\\]?)(?:,(\\[?\\w*(?:\\+\\w*)?\\]?))?");
 	smatch match;
 
+    // Try to parse a binary expression
 	if(regex_search(line, match, binre)){
 	    // Parse label
 	    Label *label = Parser::matchLabel(match.str(1), symbolTable);
@@ -32,24 +32,35 @@ Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
         // Instruction mnemonic
 		string instruction = match.str(2);
 
-		// LHS and RHS
+		// LHS
 	    Expression *lhs = Parser::matchExpression(match.str(4), symbolTable);
-	    Expression *rhs = Parser::matchExpression(match.str(5), symbolTable);
 
-		if(instruction == "add"){
-			ret = new AddInstruction(label, accessSize, lhs, rhs);
-			cout << "Add instruction found" << endl;
-		}
-		else if(instruction == "mov"){
-			ret = new MovInstruction(label, accessSize, lhs, rhs);
-			cout << "Mov instruction found" << endl;
-		}
-		else {
-			cout << "Unsupported instruction " << instruction << endl;
-		}
+	    // Binary expression
+	    if(!match.str(5).empty()){
+	        Expression *rhs = Parser::matchExpression(match.str(5), symbolTable);
+
+		    #define MatchBinInstruction(prefix, name)\
+            if(instruction == name){\
+	            return new prefix##Instruction(label, accessSize, lhs, rhs);\
+            }
+            BinExpander(MatchBinInstruction)
+        }
+
+        // Unary Expression
+        else {
+		    #define MatchUnInstruction(prefix, name)\
+            if(instruction == name){\
+	            return new prefix##Instruction(label, accessSize, lhs);\
+            }
+            UnExpander(MatchUnInstruction)
+        }
+
+        // None
+		cout << "Unsupported instruction " << instruction << endl;
+
 	}
 
-	return ret;
+	return nullptr;
 }
 
 Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
