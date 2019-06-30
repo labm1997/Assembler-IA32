@@ -21,6 +21,9 @@ class Statement {
     public:
     virtual string getObjectCode() = 0;
     virtual void prettyPrinter() = 0;
+    virtual uint32_t size() = 0;
+    Label *getLabel() {return label;};
+    virtual string getSection() = 0;
 };
 
 typedef list<Statement *> StatementList;
@@ -33,6 +36,8 @@ class Instruction : public Statement {
     virtual string getObjectCode() = 0;
     virtual void prettyPrinter() = 0;
     virtual string getName() = 0;
+    virtual uint32_t size() = 0;
+    string getSection(){ return "text"; };
 };
 
 class DeclareStatement : public Statement {
@@ -43,6 +48,8 @@ class DeclareStatement : public Statement {
     DeclareStatement(Label *, vector<int32_t>);
     string getObjectCode() { return ""; };
     void prettyPrinter();
+    uint32_t size();
+    string getSection(){ return "data"; };
 };
 
 class Program {
@@ -53,6 +60,9 @@ class Program {
     // Hash map to labels
     SymbolTable symbolTable;
 
+    // First passage algorithm
+    void firstPassage();
+
     public:
     Program(StatementList, SymbolTable);
     void prettyPrinter();
@@ -61,12 +71,13 @@ class Program {
 };
 
 class UnaryInstruction : public Instruction {
-    private:
+    protected:
     Expression *exp;
     public:
     UnaryInstruction(Label *, AccessSize, Expression *);
     void prettyPrinter();
     virtual string getName() = 0;
+    virtual uint32_t size() = 0;
 };
 
 /* Macro that expands a given macro for all unary instructions */
@@ -88,18 +99,20 @@ class prefix##Instruction : public UnaryInstruction {\
     using UnaryInstruction::UnaryInstruction;\
     string getObjectCode() { return ""; };\
     string getName() { return name; };\
+    uint32_t size();\
 };
 
 /* Create classes for all unary instructions */
 UnExpander(UnInstruction)
 
 class BinaryInstruction : public Instruction {
-    private:
+    protected:
     Expression *lhs, *rhs;
     public:
     BinaryInstruction(Label *, AccessSize, Expression *, Expression *);
     void prettyPrinter();
     virtual string getName() = 0;
+    virtual uint32_t size() = 0;
 };
 
 /* Macro that expands a given macro for all binary instructions */
@@ -116,6 +129,7 @@ class prefix##Instruction : public BinaryInstruction {\
     using BinaryInstruction::BinaryInstruction;\
     string getObjectCode() { return ""; };\
     string getName() { return name; };\
+    uint32_t size();\
 };\
 
 /* Create classes for all binary instructions */

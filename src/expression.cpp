@@ -8,7 +8,7 @@ ContentOf::ContentOf(Expression *exp) : exp(exp) {};
 
 Register::Register(string registerName) : registerName(registerName) {};
 
-Integer::Integer(long int value) : value(value) {};
+Integer::Integer(int32_t value) : value(value) {};
 
 Label::Label(string label) : label(label) {};
 
@@ -18,6 +18,14 @@ string Register::getName(){
 
 string Label::getName(){
     return this->label;
+}
+
+uint32_t Label::getAddress(){
+    return this->address;
+}
+
+void Label::setAddress(uint32_t address){
+    this->address = address;
 }
 
 void AddExpression::prettyPrinter(){

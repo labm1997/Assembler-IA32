@@ -38,7 +38,7 @@ vector<int32_t> Parser::splitToIntegers(string line, char delimiter){
 }
 
 DeclareStatement *Parser::matchDeclaration(string line, SymbolTable &symbolTable){
-    regex re("(?:(\\w*):\\s)?dd (\\d*(?:,\\d*)*)");
+    regex re("(?:(\\w*):\\s)?dd (\\d*(?:,\\s?\\d*)*)");
     smatch match;
     if(regex_search(line, match, re)){
         Label *label = Parser::matchLabel(match.str(1), symbolTable);
