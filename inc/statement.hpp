@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <map>
+#include <stdint.h>
 
 #include "expression.hpp"
 
@@ -34,6 +35,16 @@ class Instruction : public Statement {
     virtual string getName() = 0;
 };
 
+class DeclareStatement : public Statement {
+    private:
+    vector<int32_t> data;
+
+    public:
+    DeclareStatement(Label *, vector<int32_t>);
+    string getObjectCode() { return ""; };
+    void prettyPrinter();
+};
+
 class Program {
     private:
     // List of program statements
@@ -45,6 +56,7 @@ class Program {
     public:
     Program(StatementList, SymbolTable);
     void prettyPrinter();
+    string getObjectCode();
 
 };
 

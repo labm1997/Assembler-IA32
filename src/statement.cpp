@@ -3,6 +3,20 @@
 
 Program::Program(StatementList statements, SymbolTable symbolTable) : statements(statements), symbolTable(symbolTable) {};
 
+string Program::getObjectCode(){
+    string out;
+    // !TODO: first passage algorithm to get label addresses
+
+    for(auto it = this->statements.begin() ; it != this->statements.end() ; ++it){
+        out += (*it)->getObjectCode();
+    }
+    return out;
+}
+
+DeclareStatement::DeclareStatement(Label *label, vector<int32_t> data) : data(data) {
+    this->label = label;
+};
+
 BinaryInstruction::BinaryInstruction(Label *label, AccessSize accessSize, Expression *lhs, Expression *rhs) {
     this->label = label;
     this->indirectAccessSize = accessSize;
@@ -60,4 +74,20 @@ void BinaryInstruction::prettyPrinter(){
 
     cout << endl;
 
+}
+
+void DeclareStatement::prettyPrinter(){
+    if(this->label){
+        this->label->prettyPrinter();
+        cout << ": ";
+    }
+
+    cout << "dd";
+
+    for(auto it = this->data.begin() ; it != this->data.end() ; ++it){
+        cout << " " << to_string((*it));
+        if(it+1 != this->data.end()) cout << ",";
+    }
+
+    cout << endl;
 }

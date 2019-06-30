@@ -8,13 +8,45 @@ Program *Parser::parser(ifstream *input){
     string line;
 
     for(int lineNumber = 1 ; getline(*input, line) ; lineNumber++){
+
+        // Try to match instruction
         Instruction *lineInstruction;
         lineInstruction = Parser::matchInstruction(line, symbolTable);
         if(lineInstruction != nullptr)
             statements.push_back(lineInstruction);
+
+        else {
+            // Try to match declaration directive
+            DeclareStatement *lineDeclaration;
+            lineDeclaration = Parser::matchDeclaration(line, symbolTable);
+            if(lineDeclaration != nullptr)
+                statements.push_back(lineDeclaration);
+        }
     }
 
     return new Program(statements, symbolTable);
+}
+
+vector<int32_t> Parser::splitToIntegers(string line, char delimiter){
+    vector<int32_t> ret;
+    string token;
+    istringstream tokenStream(line);
+    while(getline(tokenStream, token, delimiter)){
+        ret.push_back(atoi(token.c_str()));
+    }
+    return ret;
+}
+
+DeclareStatement *Parser::matchDeclaration(string line, SymbolTable &symbolTable){
+    regex re("(?:(\\w*):\\s)?dd (\\d*(?:,\\d*)*)");
+    smatch match;
+    if(regex_search(line, match, re)){
+        Label *label = Parser::matchLabel(match.str(1), symbolTable);
+        vector<int32_t> data = Parser::splitToIntegers(match.str(2), ',');
+
+        return new DeclareStatement(label, data);
+    }
+    return nullptr;
 }
 
 Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
@@ -54,9 +86,6 @@ Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
             }
             UnExpander(MatchUnInstruction)
         }
-
-        // None
-        cout << "Unsupported instruction " << instruction << endl;
 
     }
 

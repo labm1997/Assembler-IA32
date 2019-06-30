@@ -26,6 +26,7 @@ int main(int argc, char **argv){
     // Parser file
     program = Parser::parser(&input);
     program->prettyPrinter();
+    cout << "Object code: \n" << program->getObjectCode() << endl;
     
     return 0;
 }
