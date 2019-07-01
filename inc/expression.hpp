@@ -44,6 +44,7 @@ class ContentOf : public Expression {
     ContentOf(Expression *);
     void prettyPrinter();
     ExpressionType type() { return CONTENTOF; };
+    Expression *getExpression() {return exp;};
 };
 
 // Defines class for a label that points to some memory address

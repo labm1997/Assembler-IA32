@@ -89,7 +89,9 @@ class UnaryInstruction : public Instruction {
     macro(Jg, "jg")\
     macro(Je, "je")\
     macro(Push, "push")\
+    macro(Pop, "pop")\
     macro(Call, "call")\
+    macro(Ret, "ret")\
     macro(Int, "int")\
 
 /* Macro that declares a class for an unary instruction */
@@ -119,6 +121,7 @@ class BinaryInstruction : public Instruction {
 #define BinExpander(macro)\
     macro(Add, "add")\
     macro(Sub, "sub")\
+    macro(Shl, "shl")\
     macro(Cmp, "cmp")\
     macro(Mov, "mov")\
 

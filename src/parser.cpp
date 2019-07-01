@@ -21,6 +21,9 @@ Program *Parser::parser(ifstream *input){
             lineDeclaration = Parser::matchDeclaration(line, symbolTable);
             if(lineDeclaration != nullptr)
                 statements.push_back(lineDeclaration);
+            else
+                cout << "Unsupported statement: " << line << endl;
+
         }
     }
 
@@ -159,6 +162,18 @@ Register *Parser::matchRegister(string regname){
     }
     else if(regname == "ebx"){
         return new Register("ebx");
+    }
+    else if(regname == "ecx"){
+        return new Register("ecx");
+    }
+    else if(regname == "edx"){
+        return new Register("edx");
+    }
+    else if(regname == "esp"){
+        return new Register("esp");
+    }
+    else if(regname == "ebp"){
+        return new Register("ebp");
     }
     else {
         return nullptr;
