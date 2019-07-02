@@ -1,5 +1,6 @@
 #include <regex>
 #include <iostream>
+#include <set>
 #include "parser.hpp"
 
 Program *Parser::parser(ifstream *input){
@@ -12,19 +13,21 @@ Program *Parser::parser(ifstream *input){
         // Try to match instruction
         Instruction *lineInstruction;
         lineInstruction = Parser::matchInstruction(line, symbolTable);
-        if(lineInstruction != nullptr)
+        if(lineInstruction != nullptr){
             statements.push_back(lineInstruction);
-
-        else {
-            // Try to match declaration directive
-            DeclareStatement *lineDeclaration;
-            lineDeclaration = Parser::matchDeclaration(line, symbolTable);
-            if(lineDeclaration != nullptr)
-                statements.push_back(lineDeclaration);
-            else
-                cout << "Unsupported statement: " << line << endl;
-
+            continue;
         }
+
+        // Try to match declaration directive
+        DeclareStatement *lineDeclaration;
+        lineDeclaration = Parser::matchDeclaration(line, symbolTable);
+        if(lineDeclaration != nullptr){
+            statements.push_back(lineDeclaration);
+            continue;
+        }
+
+        cout << "Unsupported statement: " << line << endl;
+
     }
 
     return new Program(statements, symbolTable);
@@ -157,27 +160,12 @@ ContentOf *Parser::matchContentOf(string cofstr, SymbolTable &symbolTable){
 }
 
 Register *Parser::matchRegister(string regname){
-    if(regname == "eax"){
-        return new Register("eax");
-    }
-    else if(regname == "ebx"){
-        return new Register("ebx");
-    }
-    else if(regname == "ecx"){
-        return new Register("ecx");
-    }
-    else if(regname == "edx"){
-        return new Register("edx");
-    }
-    else if(regname == "esp"){
-        return new Register("esp");
-    }
-    else if(regname == "ebp"){
-        return new Register("ebp");
-    }
-    else {
-        return nullptr;
-    }
+    set<string> allowed = {"eax", "ebx", "ecx", "edx", "esp", "ebp"};
+
+    if(allowed.find(regname) != allowed.end())
+        return new Register(regname);
+
+    return nullptr;
 }
 
 Integer *Parser::matchInteger(string intstr){

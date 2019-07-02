@@ -19,8 +19,12 @@ string Program::getObjectCode(){
 
     ObjectCode machineCode = this->secondPassage();
 
-    cout << machineCode.getText();
-    cout << machineCode.getData();
+    for(auto it = machineCode.getText()->begin() ; it != machineCode.getText()->end() ; ++it){
+        cout << hex << (int)(*it) << " ";
+    }
+
+    //cout << machineCode.getText();
+    //cout << machineCode.getData();
 
     return "";
 }
@@ -50,17 +54,19 @@ void Program::firstPassage(){
 }
 
 ObjectCode Program::secondPassage(){
-    MachineCode text;
-    MachineCode data;
+    MachineCode *text = new MachineCode;
+    MachineCode *data = new MachineCode;
 
     for(auto it = this->statements.begin(); it != this->statements.end() ; ++it){
         if((*it) == nullptr) continue;
 
+        MachineCode code = (*it)->machineCode();
+
         if((*it)->getSection() == "text"){
-            text += (*it)->machineCode();
+            text->insert(text->end(), code.begin(), code.end());
         }
         else if ((*it)->getSection() == "data"){
-            data += (*it)->machineCode();
+            data->insert(data->end(), code.begin(), code.end());
         }
         else {
             cout << "Unsupported section " << (*it)->getSection() << endl;

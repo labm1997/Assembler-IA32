@@ -71,6 +71,7 @@ class Integer : public AtomicExpression {
     Integer(int32_t);
     void prettyPrinter();
     ExpressionType type() { return t_Integer; };
+    int32_t getValue() { return value; };
 };
 
 // Defines class for a register

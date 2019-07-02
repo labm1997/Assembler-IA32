@@ -13,17 +13,17 @@
 using namespace std;
 
 typedef map<string, Label *> SymbolTable;
-typedef string MachineCode;
+typedef vector<uint8_t> MachineCode;
 
 class ObjectCode {
     private:
-    MachineCode text;
-    MachineCode data;
+    MachineCode *text;
+    MachineCode *data;
 
     public:
-    ObjectCode(MachineCode text, MachineCode data) : text(text), data(data) {};
-    MachineCode getText() { return text; }
-    MachineCode getData() { return data; }
+    ObjectCode(MachineCode *text, MachineCode *data) : text(text), data(data) {};
+    MachineCode *getText() { return text; }
+    MachineCode *getData() { return data; }
 };
 
 class Statement {
