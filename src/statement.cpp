@@ -7,17 +7,22 @@ uint32_t dc = 0;
 Program::Program(StatementList statements, SymbolTable symbolTable) : statements(statements), symbolTable(symbolTable) {};
 
 string Program::getObjectCode(){
-    string out;
 
     // First passage algorithm
     this->firstPassage();
 
+    // Print labels and its addresses
     for(auto it = symbolTable.begin() ; it != symbolTable.end() ; ++it){
         if((*it).second == nullptr) continue;
         cout << (*it).second->getName() << ": " << (*it).second->getAddress() << endl;
     }
 
-    return out;
+    ObjectCode machineCode = this->secondPassage();
+
+    cout << machineCode.getText();
+    cout << machineCode.getData();
+
+    return "";
 }
 
 void Program::firstPassage(){
@@ -42,6 +47,27 @@ void Program::firstPassage(){
             cout << "Unsupported section " << (*it)->getSection() << endl;
         }
     }
+}
+
+ObjectCode Program::secondPassage(){
+    MachineCode text;
+    MachineCode data;
+
+    for(auto it = this->statements.begin(); it != this->statements.end() ; ++it){
+        if((*it) == nullptr) continue;
+
+        if((*it)->getSection() == "text"){
+            text += (*it)->machineCode();
+        }
+        else if ((*it)->getSection() == "data"){
+            data += (*it)->machineCode();
+        }
+        else {
+            cout << "Unsupported section " << (*it)->getSection() << endl;
+        }
+    }
+
+    return ObjectCode(text, data);
 }
 
 DeclareStatement::DeclareStatement(Label *label, vector<int32_t> data) : data(data) {

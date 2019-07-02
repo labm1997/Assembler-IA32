@@ -13,13 +13,25 @@
 using namespace std;
 
 typedef map<string, Label *> SymbolTable;
+typedef string MachineCode;
+
+class ObjectCode {
+    private:
+    MachineCode text;
+    MachineCode data;
+
+    public:
+    ObjectCode(MachineCode text, MachineCode data) : text(text), data(data) {};
+    MachineCode getText() { return text; }
+    MachineCode getData() { return data; }
+};
 
 class Statement {
     protected:
     Label *label;
 
     public:
-    virtual string getObjectCode() = 0;
+    virtual MachineCode machineCode() = 0;
     virtual void prettyPrinter() = 0;
     Label *getLabel() {return label;};
     virtual string getSection() = 0;
@@ -33,7 +45,7 @@ class Instruction : public Statement {
     protected:
     AccessSize indirectAccessSize;
     public:
-    virtual string getObjectCode() = 0;
+    virtual MachineCode machineCode() = 0;
     virtual void prettyPrinter() = 0;
     virtual string getName() = 0;
     string getSection(){ return "text"; };
@@ -46,7 +58,7 @@ class DeclareStatement : public Statement {
 
     public:
     DeclareStatement(Label *, vector<int32_t>);
-    string getObjectCode() { return ""; };
+    MachineCode machineCode();
     void prettyPrinter();
     string getSection(){ return "data"; };
     uint32_t getDataLength() { return this->data.size(); };
@@ -64,6 +76,9 @@ class Program {
     // First passage algorithm
     void firstPassage();
 
+    // Second passage algorithm
+    ObjectCode secondPassage();
+
     public:
     Program(StatementList, SymbolTable);
     void prettyPrinter();
@@ -76,6 +91,7 @@ class UnaryInstruction : public Instruction {
     Expression *exp;
     public:
     UnaryInstruction(Label *, AccessSize, Expression *);
+    virtual MachineCode machineCode() = 0;
     void prettyPrinter();
     virtual string getName() = 0;
     Expression *getExp() { return exp ; };
@@ -102,7 +118,7 @@ class UnaryInstruction : public Instruction {
 class prefix##Instruction : public UnaryInstruction {\
     public:\
     using UnaryInstruction::UnaryInstruction;\
-    string getObjectCode() { return ""; };\
+    MachineCode machineCode();\
     string getName() { return name; };\
     uint32_t size();\
 };
@@ -115,6 +131,7 @@ class BinaryInstruction : public Instruction {
     Expression *lhs, *rhs;
     public:
     BinaryInstruction(Label *, AccessSize, Expression *, Expression *);
+    virtual MachineCode machineCode() = 0;
     void prettyPrinter();
     virtual string getName() = 0;
     Expression *getLhs() { return lhs ; };
@@ -138,7 +155,7 @@ class BinaryInstruction : public Instruction {
 class prefix##Instruction : public BinaryInstruction {\
     public:\
     using BinaryInstruction::BinaryInstruction;\
-    string getObjectCode() { return ""; };\
+    MachineCode machineCode();\
     string getName() { return name; };\
     uint32_t size();\
 };\
