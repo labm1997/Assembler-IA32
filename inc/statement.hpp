@@ -152,7 +152,8 @@ class Program {
     public:
     Program(StatementList, SymbolTable);
     void prettyPrinter();
-    string getObjectCode();
+    ObjectCode getObjectCode();
+    void saveExecutable();
 
 };
 
