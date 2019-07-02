@@ -6,11 +6,11 @@
 using namespace std;
 
 typedef enum {
-    ADD,
-    CONTENTOF,
-    LABEL,
-    INTEGER,
-    REGISTER
+    t_AddExpression,
+    t_ContentOf,
+    t_Label,
+    t_Integer,
+    t_Register
 } ExpressionType;
 
 class Expression {
@@ -33,7 +33,7 @@ class AddExpression : public Expression {
     public:
     AddExpression(AtomicExpression *, AtomicExpression *);
     void prettyPrinter();
-    ExpressionType type() { return ADD; };
+    ExpressionType type() { return t_AddExpression; };
 };
 
 // Defines class for [Expression] on AT&T IA32 Assembly
@@ -43,7 +43,7 @@ class ContentOf : public Expression {
     public:
     ContentOf(Expression *);
     void prettyPrinter();
-    ExpressionType type() { return CONTENTOF; };
+    ExpressionType type() { return t_ContentOf; };
     Expression *getExpression() {return exp;};
 };
 
@@ -59,7 +59,7 @@ class Label : public AtomicExpression {
     void setAddress(uint32_t);
     string getName();
     void prettyPrinter();
-    ExpressionType type() { return LABEL; };
+    ExpressionType type() { return t_Label; };
 };
 
 // Defines class for an integer
@@ -70,7 +70,7 @@ class Integer : public AtomicExpression {
     public:
     Integer(int32_t);
     void prettyPrinter();
-    ExpressionType type() { return INTEGER; };
+    ExpressionType type() { return t_Integer; };
 };
 
 // Defines class for a register
@@ -82,7 +82,7 @@ class Register : public AtomicExpression {
     Register(string);
     string getName();
     void prettyPrinter();
-    ExpressionType type() { return REGISTER; };
+    ExpressionType type() { return t_Register; };
 };
 
 #endif

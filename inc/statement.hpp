@@ -21,9 +21,9 @@ class Statement {
     public:
     virtual string getObjectCode() = 0;
     virtual void prettyPrinter() = 0;
-    virtual uint32_t size() = 0;
     Label *getLabel() {return label;};
     virtual string getSection() = 0;
+    virtual uint32_t size() = 0;
 };
 
 typedef list<Statement *> StatementList;
@@ -36,8 +36,8 @@ class Instruction : public Statement {
     virtual string getObjectCode() = 0;
     virtual void prettyPrinter() = 0;
     virtual string getName() = 0;
-    virtual uint32_t size() = 0;
     string getSection(){ return "text"; };
+    virtual uint32_t size() = 0;
 };
 
 class DeclareStatement : public Statement {
@@ -48,8 +48,9 @@ class DeclareStatement : public Statement {
     DeclareStatement(Label *, vector<int32_t>);
     string getObjectCode() { return ""; };
     void prettyPrinter();
-    uint32_t size();
     string getSection(){ return "data"; };
+    uint32_t getDataLength() { return this->data.size(); };
+    uint32_t size();
 };
 
 class Program {
@@ -77,6 +78,8 @@ class UnaryInstruction : public Instruction {
     UnaryInstruction(Label *, AccessSize, Expression *);
     void prettyPrinter();
     virtual string getName() = 0;
+    Expression *getExp() { return exp ; };
+    bool is(ExpressionType t){ return this->exp->isType(t); };
     virtual uint32_t size() = 0;
 };
 
@@ -105,7 +108,7 @@ class prefix##Instruction : public UnaryInstruction {\
 };
 
 /* Create classes for all unary instructions */
-UnExpander(UnInstruction)
+UnExpander(UnInstruction);
 
 class BinaryInstruction : public Instruction {
     protected:
@@ -114,6 +117,11 @@ class BinaryInstruction : public Instruction {
     BinaryInstruction(Label *, AccessSize, Expression *, Expression *);
     void prettyPrinter();
     virtual string getName() = 0;
+    Expression *getLhs() { return lhs ; };
+    Expression *getRhs() { return rhs ; };
+    bool is(ExpressionType t1, ExpressionType t2){
+        return this->lhs->isType(t1) && this->rhs->isType(t2);
+    };
     virtual uint32_t size() = 0;
 };
 
@@ -136,6 +144,6 @@ class prefix##Instruction : public BinaryInstruction {\
 };\
 
 /* Create classes for all binary instructions */
-BinExpander(BinInstruction)
+BinExpander(BinInstruction);
 
 #endif
