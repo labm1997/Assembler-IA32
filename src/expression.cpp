@@ -1,4 +1,5 @@
 #include "expression.hpp"
+#include "statement.hpp"
 
 #include <iostream>
 
@@ -21,7 +22,9 @@ string Label::getName(){
 }
 
 uint32_t Label::getAddress(){
-    return this->address;
+    if(this->getSection() == "text") return this->address + START_TEXT_ADDRESS;
+    if(this->getSection() == "data") return this->address + START_DATA_ADDRESS;
+    return 0;
 }
 
 void Label::setAddress(uint32_t address){

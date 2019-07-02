@@ -10,6 +10,9 @@
 
 #include "expression.hpp"
 
+#define START_TEXT_ADDRESS 0x08049000
+#define START_DATA_ADDRESS 0x0804a000
+
 using namespace std;
 
 typedef map<string, Label *> SymbolTable;

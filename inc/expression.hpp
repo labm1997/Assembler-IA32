@@ -33,11 +33,15 @@ class Label : public AtomicExpression {
     private:
     string label;
     uint32_t address;
+    string section;
 
     public:
     Label(string);
     uint32_t getAddress();
+    uint32_t getNotBiasedAddress() { return address; };
     void setAddress(uint32_t);
+    void setSection(string section) { this->section = section; };
+    string getSection() { return this->section; };
     string getName();
     void prettyPrinter();
     ExpressionType type() { return t_Label; };

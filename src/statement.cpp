@@ -24,8 +24,8 @@ void Program::saveExecutable(){
 
     segment *text_seg = writer.segments.add();
     text_seg->set_type( PT_LOAD );
-    text_seg->set_virtual_address( 0x00 );
-    text_seg->set_physical_address( 0x00 );
+    text_seg->set_virtual_address( START_TEXT_ADDRESS );
+    text_seg->set_physical_address( START_TEXT_ADDRESS );
     text_seg->set_flags( PF_X | PF_R );
     text_seg->set_align( 0x1000 );
 
@@ -39,14 +39,14 @@ void Program::saveExecutable(){
 
     segment *data_seg = writer.segments.add();
     data_seg->set_type( PT_LOAD );
-    data_seg->set_virtual_address( 0x00 );
-    data_seg->set_physical_address( 0x00 );
+    data_seg->set_virtual_address( START_DATA_ADDRESS );
+    data_seg->set_physical_address( START_DATA_ADDRESS );
     data_seg->set_flags( PF_W | PF_R );
-    data_seg->set_align( 0x10 );
+    data_seg->set_align( 0x1000 );
 
     data_seg->add_section_index( data_sec->get_index(), data_sec->get_addr_align());
 
-    writer.set_entry( 0x00 );
+    writer.set_entry( START_TEXT_ADDRESS );
 
     writer.save( "output" );
 
@@ -83,6 +83,7 @@ void Program::firstPassage(){
         if((*it)->getSection() == "text"){
             if((*it)->getLabel() != nullptr){
                 (*it)->getLabel()->setAddress(textPosition);
+                (*it)->getLabel()->setSection("text");
             }
             (*it)->setAddress(textPosition);
             textPosition += (*it)->size();
@@ -90,6 +91,7 @@ void Program::firstPassage(){
         else if ((*it)->getSection() == "data"){
             if((*it)->getLabel() != nullptr){
                 (*it)->getLabel()->setAddress(dataPosition);
+                (*it)->getLabel()->setSection("data");
             }
             (*it)->setAddress(dataPosition);
             dataPosition += (*it)->size();

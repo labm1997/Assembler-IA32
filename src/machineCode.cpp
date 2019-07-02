@@ -209,7 +209,7 @@ MachineCode JmpInstruction::machineCode(){
     if(this->is(t_Label)){
         Label *label = dynamic_cast<Label *>(this->getExp());
         code.setOpcode(0xeb);
-        code.set8bitsImmediate(label->getAddress()-this->getAddress()-this->size());
+        code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
     cout << "Unsupported format for " << this->getName() << endl;
@@ -221,7 +221,7 @@ MachineCode JlInstruction::machineCode(){
     if(this->is(t_Label)){
         Label *label = dynamic_cast<Label *>(this->getExp());
         code.setOpcode(0x7c);
-        code.set8bitsImmediate(label->getAddress()-this->getAddress()-this->size());
+        code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
     cout << "Unsupported format for " << this->getName() << endl;
@@ -233,7 +233,7 @@ MachineCode JgInstruction::machineCode(){
     if(this->is(t_Label)){
         Label *label = dynamic_cast<Label *>(this->getExp());
         code.setOpcode(0x7f);
-        code.set8bitsImmediate(label->getAddress()-this->getAddress()-this->size());
+        code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
     cout << "Unsupported format for " << this->getName() << endl;
@@ -245,7 +245,7 @@ MachineCode JeInstruction::machineCode(){
     if(this->is(t_Label)){
         Label *label = dynamic_cast<Label *>(this->getExp());
         code.setOpcode(0x74);
-        code.set8bitsImmediate(label->getAddress()-this->getAddress()-this->size());
+        code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
     cout << "Unsupported format for " << this->getName() << endl;
@@ -285,7 +285,7 @@ MachineCode CallInstruction::machineCode(){
     if(this->is(t_Label)){
         Label *label = dynamic_cast<Label *>(this->getExp());
         code.setOpcode(0xe8);
-        code.setImmediate(label->getAddress()-this->getAddress()-this->size());
+        code.setImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
     cout << "Unsupported format for " << this->getName() << endl;
