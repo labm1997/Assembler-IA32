@@ -6,11 +6,11 @@
 
 class Parser {
     private:
-    static AddExpression *matchAddExpression(string, SymbolTable&);
     static AtomicExpression *matchAtomicExpression(string, SymbolTable&);
     static Instruction *matchInstruction(string, SymbolTable&);
     static DeclareStatement *matchDeclaration(string, SymbolTable&);
-    static ContentOf *matchContentOf(string, SymbolTable&);
+    static ContentOfLabel *matchContentOfLabel(string, SymbolTable&);
+    static ContentOfRegister *matchContentOfRegister(string);
     static AccessSize matchAccessSize(string);
     static Expression *matchExpression(string, SymbolTable&);
     static Register *matchRegister(string);

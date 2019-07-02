@@ -2,9 +2,8 @@
 
 #include <iostream>
 
-AddExpression::AddExpression(AtomicExpression *lhs, AtomicExpression *rhs) : lhs(lhs), rhs(rhs) {};
-
-ContentOf::ContentOf(Expression *exp) : exp(exp) {};
+ContentOfLabel::ContentOfLabel(Label *label, Integer *offset) : label(label), offset(offset) {};
+ContentOfRegister::ContentOfRegister(Register *reg, Integer *offset) : reg(reg), offset(offset) {};
 
 Register::Register(string registerName) : registerName(registerName) {};
 
@@ -28,15 +27,23 @@ void Label::setAddress(uint32_t address){
     this->address = address;
 }
 
-void AddExpression::prettyPrinter(){
-    if(this->lhs != nullptr) this->lhs->prettyPrinter();
-    cout << "+";
-    if(this->rhs != nullptr) this->rhs->prettyPrinter();
+void ContentOfLabel::prettyPrinter(){
+    cout << "[";
+    if(this->label != nullptr) this->label->prettyPrinter();
+    if(this->offset != nullptr) {
+        cout << "+";
+        this->offset->prettyPrinter();
+    }
+    cout << "]";
 }
 
-void ContentOf::prettyPrinter(){
+void ContentOfRegister::prettyPrinter(){
     cout << "[";
-    if(this->exp != nullptr) this->exp->prettyPrinter();
+    if(this->reg != nullptr) this->reg->prettyPrinter();
+    if(this->offset != nullptr) {
+        cout << "+";
+        this->offset->prettyPrinter();
+    }
     cout << "]";
 }
 

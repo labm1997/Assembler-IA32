@@ -100,12 +100,12 @@ Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
 
 Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
     // Try to match a containsOf
-    ContentOf *cof = Parser::matchContentOf(expstr, symbolTable);
-    if(cof != nullptr) return cof;
+    ContentOfRegister *cofreg = Parser::matchContentOfRegister(expstr);
+    if(cofreg != nullptr) return cofreg;
 
-    // Try to match an add expression
-    AddExpression *addexp = Parser::matchAddExpression(expstr, symbolTable);
-    if(addexp != nullptr) return addexp;
+    // Try to match a containsOf
+    ContentOfLabel *coflabel = Parser::matchContentOfLabel(expstr, symbolTable);
+    if(coflabel != nullptr) return coflabel;
 
     // Try to match an atomic expression (register, integer or label)
     AtomicExpression *atexp = Parser::matchAtomicExpression(expstr, symbolTable);
@@ -130,31 +130,35 @@ AtomicExpression *Parser::matchAtomicExpression(string expstr, SymbolTable &symb
     return nullptr;
 }
 
-AddExpression *Parser::matchAddExpression(string aexp, SymbolTable &symbolTable){
-    regex re("^(\\w*)\\+(\\w*)$");
-    smatch match;
-
-    if(regex_search(aexp, match, re)){
-        AtomicExpression *lhs = Parser::matchAtomicExpression(match.str(1), symbolTable);
-        AtomicExpression *rhs = Parser::matchAtomicExpression(match.str(2), symbolTable);
-        return new AddExpression(lhs, rhs);
-    }
-    return nullptr;
-}
-
 AccessSize Parser::matchAccessSize(string asstr){
     if(asstr == "dword") return "dword";
     return "";
 }
 
-ContentOf *Parser::matchContentOf(string cofstr, SymbolTable &symbolTable){
-    regex re("^\\[(\\w*(?:\\+\\w*)?)\\]$");
+ContentOfLabel *Parser::matchContentOfLabel(string cofstr, SymbolTable &symbolTable){
+    regex re("^\\[(\\w*)(?:\\+(\\w*))?\\]$");
     smatch match;
 
     if(regex_search(cofstr, match, re)){
-        /* !FIXME: Only one content of is allowed,
-         should we create a dedicated matchContentOfExpression */
-        return new ContentOf(matchExpression(match.str(1), symbolTable));
+        Label *label = matchLabel(match.str(1), symbolTable);
+        Integer *offset = matchInteger(match.str(2));
+        if(label != nullptr){
+            return new ContentOfLabel(label, offset);
+        }
+    }
+    return nullptr;
+}
+
+ContentOfRegister *Parser::matchContentOfRegister(string cofstr){
+    regex re("^\\[(\\w*)(?:\\+(\\w*))?\\]$");
+    smatch match;
+
+    if(regex_search(cofstr, match, re)){
+        Register *reg = matchRegister(match.str(1));
+        Integer *offset = matchInteger(match.str(2));
+        if(reg != nullptr){
+            return new ContentOfRegister(reg, offset);
+        }
     }
     return nullptr;
 }

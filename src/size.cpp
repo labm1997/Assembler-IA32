@@ -6,14 +6,14 @@ uint32_t DeclareStatement::size(){
 }
 
 uint32_t AddInstruction::size(){
-    if(this->is(t_Register, t_ContentOf)) return 6;
+    if(this->is(t_Register, t_ContentOfLabel)) return 6;
     if(this->is(t_Register, t_Integer)) return 3;
     cout << "Unsupported format for " << this->getName() << endl;
     return 0;
 }
 
 uint32_t SubInstruction::size(){
-    if(this->is(t_Register, t_ContentOf)) return 6;
+    if(this->is(t_Register, t_ContentOfLabel)) return 6;
     cout << "Unsupported format for " << this->getName() << endl;
     return 0;
 }
@@ -31,17 +31,19 @@ uint32_t CmpInstruction::size(){
 }
 
 uint32_t MovInstruction::size(){
-    if(this->is(t_Register, t_ContentOf)){
+    if(this->is(t_Register, t_ContentOfLabel)){
         Register *reg = dynamic_cast<Register *>(this->getLhs());
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getRhs());
         if(reg->getName() == "eax") return 5;
         if(reg->getName() == "ebx") return 6;
-        if((reg->getName() == "ecx" || reg->getName() == "edx") &&
-            contentof->getExpression()->isType(t_AddExpression))
+    }
+
+    if(this->is(t_Register, t_ContentOfRegister)){
+        Register *reg = dynamic_cast<Register *>(this->getLhs());
+        if((reg->getName() == "ecx" || reg->getName() == "edx"))
             return 3;
     }
 
-    if(this->is(t_ContentOf, t_Register)){
+    if(this->is(t_ContentOfLabel, t_Register)){
         Register *reg = dynamic_cast<Register *>(this->getRhs());
         if(reg->getName() == "eax") return 5;
         if(reg->getName() == "ebx") return 6;
@@ -56,14 +58,14 @@ uint32_t MovInstruction::size(){
 }
 
 uint32_t MultInstruction::size(){
-    if(this->is(t_ContentOf)) return 6;
+    if(this->is(t_ContentOfLabel)) return 6;
 
     cout << "Unsupported format for " << this->getName() << endl;
     return 0;
 }
 
 uint32_t DivInstruction::size(){
-    if(this->is(t_ContentOf)) return 6;
+    if(this->is(t_ContentOfLabel)) return 6;
     cout << "Unsupported format for " << this->getName() << endl;
     return 0;
 }
@@ -95,7 +97,7 @@ uint32_t JeInstruction::size(){
 
 uint32_t PushInstruction::size(){
     if(this->is(t_Label)) return 5;
-    if(this->is(t_ContentOf)) return 6;
+    if(this->is(t_ContentOfLabel)) return 6;
     if(this->is(t_Register)) return 1;
     cout << "Unsupported format for " << this->getName() << endl;
     return 0;

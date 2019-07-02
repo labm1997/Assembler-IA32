@@ -15,18 +15,14 @@ MachineCode DeclareStatement::machineCode(){
 
 MachineCode AddInstruction::machineCode(){
     InstructionCode code;
-    if(this->is(t_Register, t_ContentOf)) {
+    if(this->is(t_Register, t_ContentOfLabel)) {
         Register *reg = dynamic_cast<Register *>(this->getLhs());
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getRhs());
-
-        if(contentof->getExpression()->isType(t_Label)){
-            Label *label = dynamic_cast<Label *>(contentof->getExpression());
-            code.setOpcode(0x03);
-            if(reg->getName() == "eax"){
-                code.setModRM(0x05);
-                code.setImmediate(label->getAddress());
-                return code.getCode();
-            }
+        ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getRhs());
+        code.setOpcode(0x03);
+        if(reg->getName() == "eax"){
+            code.setModRM(0x05);
+            code.setImmediate(contentof->getAddress());
+            return code.getCode();
         }
 
     }
@@ -43,18 +39,15 @@ MachineCode AddInstruction::machineCode(){
 
 MachineCode SubInstruction::machineCode(){
     InstructionCode code;
-    if(this->is(t_Register, t_ContentOf)) {
+    if(this->is(t_Register, t_ContentOfLabel)) {
         Register *reg = dynamic_cast<Register *>(this->getLhs());
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getRhs());
+        ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getRhs());
 
-        if(contentof->getExpression()->isType(t_Label)){
-            Label *label = dynamic_cast<Label *>(contentof->getExpression());
-            code.setOpcode(0x2b);
-            if(reg->getName() == "eax"){
-                code.setModRM(0x05);
-                code.setImmediate(label->getAddress());
-                return code.getCode();
-            }
+        code.setOpcode(0x2b);
+        if(reg->getName() == "eax"){
+            code.setModRM(0x05);
+            code.setImmediate(contentof->getAddress());
+            return code.getCode();
         }
 
     }
@@ -96,61 +89,54 @@ MachineCode CmpInstruction::machineCode(){
 
 MachineCode MovInstruction::machineCode(){
     InstructionCode code;
-    if(this->is(t_Register, t_ContentOf)){
+    if(this->is(t_Register, t_ContentOfLabel)){
         Register *reg = dynamic_cast<Register *>(this->getLhs());
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getRhs());
+        ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getRhs());
         if(reg->getName() == "eax") {
-            if(contentof->getExpression()->isType(t_Label)){
-                Label *label = dynamic_cast<Label *>(contentof->getExpression());
-                code.setOpcode(0xa1);
-                code.setDisplacement(label->getAddress());
-                return code.getCode();
-            }
+            code.setOpcode(0xa1);
+            code.setDisplacement(contentof->getAddress());
+            return code.getCode();
         }
         if(reg->getName() == "ebx") {
-            if(contentof->getExpression()->isType(t_Label)){
-                Label *label = dynamic_cast<Label *>(contentof->getExpression());
-                code.setOpcode(0x8b);
-                code.setModRM(0x1d);
-                code.setDisplacement(label->getAddress());
-                return code.getCode();
-            }
-        }
-
-        if((reg->getName() == "ecx" || reg->getName() == "edx") &&
-            contentof->getExpression()->isType(t_AddExpression)){
-            AddExpression *addexp = dynamic_cast<AddExpression *>(contentof->getExpression());
-
-            if(addexp->getRhs()->isType(t_Integer)){
-                Integer *integer = dynamic_cast<Integer *>(addexp->getRhs());
-                code.setOpcode(0x8b);
-                if(reg->getName() == "ecx") code.setModRM(0x4d);
-                else if(reg->getName() == "edx") code.setModRM(0x55);
-                code.set8bitsDisplacement(integer->getValue());
-                return code.getCode();
-            }
+            code.setOpcode(0x8b);
+            code.setModRM(0x1d);
+            code.setDisplacement(contentof->getAddress());
+            return code.getCode();
         }
     }
 
-    else if(this->is(t_ContentOf, t_Register)){
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getLhs());
+    else if(this->is(t_Register, t_ContentOfRegister)){
+        Register *reg = dynamic_cast<Register *>(this->getLhs());
+        ContentOfRegister *contentof = dynamic_cast<ContentOfRegister *>(this->getRhs());
+        Integer *integer = contentof->getOffset();
+
+        // !FIXME: Only if register1 is ebp
+        if((reg->getName() == "ecx" || reg->getName() == "edx")){
+            code.setOpcode(0x8b);
+            if(reg->getName() == "ecx") code.setModRM(0x4d);
+            else if(reg->getName() == "edx") code.setModRM(0x55);
+            if(integer != nullptr)
+                code.set8bitsDisplacement(integer->getValue());
+            else
+                code.set8bitsDisplacement(0x00);
+            return code.getCode();
+        }
+
+    }
+
+    else if(this->is(t_ContentOfLabel, t_Register)){
+        ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getLhs());
         Register *reg = dynamic_cast<Register *>(this->getRhs());
         if(reg->getName() == "eax") {
-            if(contentof->getExpression()->isType(t_Label)){
-                Label *label = dynamic_cast<Label *>(contentof->getExpression());
-                code.setOpcode(0xa3);
-                code.setDisplacement(label->getAddress());
-                return code.getCode();
-            }
+            code.setOpcode(0xa3);
+            code.setDisplacement(contentof->getAddress());
+            return code.getCode();
         }
         if(reg->getName() == "ebx") {
-            if(contentof->getExpression()->isType(t_Label)){
-                Label *label = dynamic_cast<Label *>(contentof->getExpression());
-                code.setOpcode(0x89);
-                code.setModRM(0x1d);
-                code.setDisplacement(label->getAddress());
-                return code.getCode();
-            }
+            code.setOpcode(0x89);
+            code.setModRM(0x1d);
+            code.setDisplacement(contentof->getAddress());
+            return code.getCode();
         }
     }
 
@@ -192,15 +178,12 @@ MachineCode MovInstruction::machineCode(){
 
 MachineCode MultInstruction::machineCode(){
     InstructionCode code;
-    if(this->is(t_ContentOf)) {
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getExp());
-        if(contentof->getExpression()->isType(t_Label)){
-            Label *label = dynamic_cast<Label *>(contentof->getExpression());
-            code.setOpcode(0xf7);
-            code.setModRM(0x25);
-            code.setDisplacement(label->getAddress());
-            return code.getCode();
-        }
+    if(this->is(t_ContentOfLabel)) {
+        ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getExp());
+        code.setOpcode(0xf7);
+        code.setModRM(0x25);
+        code.setDisplacement(contentof->getAddress());
+        return code.getCode();
     }
 
     cout << "Unsupported format for " << this->getName() << endl;
@@ -209,15 +192,12 @@ MachineCode MultInstruction::machineCode(){
 
 MachineCode DivInstruction::machineCode(){
     InstructionCode code;
-    if(this->is(t_ContentOf)) {
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getExp());
-        if(contentof->getExpression()->isType(t_Label)){
-            Label *label = dynamic_cast<Label *>(contentof->getExpression());
-            code.setOpcode(0xf7);
-            code.setModRM(0x35);
-            code.setDisplacement(label->getAddress());
-            return code.getCode();
-        }
+    if(this->is(t_ContentOfLabel)) {
+        ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getExp());
+        code.setOpcode(0xf7);
+        code.setModRM(0x35);
+        code.setDisplacement(contentof->getAddress());
+        return code.getCode();
     }
     cout << "Unsupported format for " << this->getName() << endl;
     return vector<uint8_t>({});
@@ -280,15 +260,12 @@ MachineCode PushInstruction::machineCode(){
         code.setImmediate(label->getAddress());
         return code.getCode();
     }
-    if(this->is(t_ContentOf)) {
-        ContentOf *contentof = dynamic_cast<ContentOf *>(this->getExp());
-        if(contentof->getExpression()->isType(t_Label)){
-            Label *label = dynamic_cast<Label *>(contentof->getExpression());
-            code.setOpcode(0xff);
-            code.setModRM(0x35);
-            code.setImmediate(label->getAddress());
-            return code.getCode();
-        }
+    if(this->is(t_ContentOfLabel)) {
+        ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getExp());
+        code.setOpcode(0xff);
+        code.setModRM(0x35);
+        code.setImmediate(contentof->getAddress());
+        return code.getCode();
     }
     if(this->is(t_Register)) {
         return vector<uint8_t>({0x55});
