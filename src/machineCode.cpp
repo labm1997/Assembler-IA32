@@ -260,6 +260,12 @@ MachineCode PushInstruction::machineCode(){
         code.setImmediate(label->getAddress());
         return code.getCode();
     }
+    if(this->is(t_LabelAdd)) {
+        LabelAdd *label = dynamic_cast<LabelAdd *>(this->getExp());
+        code.setOpcode(0x68);
+        code.setImmediate(label->getAddress());
+        return code.getCode();
+    }
     if(this->is(t_ContentOfLabel)) {
         ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getExp());
         code.setOpcode(0xff);

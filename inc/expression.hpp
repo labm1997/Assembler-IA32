@@ -10,6 +10,7 @@ typedef enum {
     t_ContentOfLabel,
     t_ContentOfRegister,
     t_Label,
+    t_LabelAdd,
     t_Integer,
     t_Register
 } ExpressionType;
@@ -52,6 +53,21 @@ class Integer : public AtomicExpression {
     void prettyPrinter();
     ExpressionType type() { return t_Integer; };
     int32_t getValue() { return value; };
+};
+
+class LabelAdd : public Expression {
+    private:
+    Label *label;
+    Integer *offset;
+    public:
+    LabelAdd(Label *, Integer *);
+    void prettyPrinter();
+    ExpressionType type() { return t_LabelAdd; };
+    uint32_t getAddress() {
+        if(label == nullptr) return 0;
+        if(offset == nullptr) return label->getAddress();
+        return label->getAddress() + offset->getValue();
+    };
 };
 
 // Defines class for a register

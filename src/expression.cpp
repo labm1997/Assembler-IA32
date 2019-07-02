@@ -10,6 +10,7 @@ Register::Register(string registerName) : registerName(registerName) {};
 Integer::Integer(int32_t value) : value(value) {};
 
 Label::Label(string label) : label(label) {};
+LabelAdd::LabelAdd(Label *label, Integer *offset) : label(label), offset(offset) {};
 
 string Register::getName(){
     return this->registerName;
@@ -25,6 +26,14 @@ uint32_t Label::getAddress(){
 
 void Label::setAddress(uint32_t address){
     this->address = address;
+}
+
+void LabelAdd::prettyPrinter(){
+    if(this->label != nullptr) this->label->prettyPrinter();
+    if(this->offset != nullptr) {
+        cout << "+";
+        this->offset->prettyPrinter();
+    }
 }
 
 void ContentOfLabel::prettyPrinter(){

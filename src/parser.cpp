@@ -107,10 +107,28 @@ Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
     ContentOfLabel *coflabel = Parser::matchContentOfLabel(expstr, symbolTable);
     if(coflabel != nullptr) return coflabel;
 
+    // Try to match a label add
+    LabelAdd *labeladd = Parser::matchLabelAdd(expstr, symbolTable);
+    if(labeladd != nullptr) return labeladd;
+
     // Try to match an atomic expression (register, integer or label)
     AtomicExpression *atexp = Parser::matchAtomicExpression(expstr, symbolTable);
     if(atexp != nullptr) return atexp;
 
+    return nullptr;
+}
+
+LabelAdd *Parser::matchLabelAdd(string expstr, SymbolTable &symbolTable){
+    regex re("^(\\w*)(?:\\+(\\w*))$");
+    smatch match;
+
+    if(regex_search(expstr, match, re)){
+        Label *label = matchLabel(match.str(1), symbolTable);
+        Integer *offset = matchInteger(match.str(2));
+        if(label != nullptr && offset != nullptr){
+            return new LabelAdd(label, offset);
+        }
+    }
     return nullptr;
 }
 

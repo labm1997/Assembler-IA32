@@ -96,7 +96,7 @@ uint32_t JeInstruction::size(){
 }
 
 uint32_t PushInstruction::size(){
-    if(this->is(t_Label)) return 5;
+    if(this->is(t_Label) || this->is(t_LabelAdd)) return 5;
     if(this->is(t_ContentOfLabel)) return 6;
     if(this->is(t_Register)) return 1;
     cout << "Unsupported format for " << this->getName() << endl;
