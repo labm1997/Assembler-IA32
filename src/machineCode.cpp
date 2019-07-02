@@ -89,7 +89,20 @@ MachineCode CmpInstruction::machineCode(){
 
 MachineCode MovInstruction::machineCode(){
     InstructionCode code;
-    if(this->is(t_Register, t_ContentOfLabel)){
+    if(this->indirectAccessSize == "byte"){
+        if(this->is(t_ContentOfRegister, t_Integer)){
+            ContentOfRegister *contentof = dynamic_cast<ContentOfRegister *>(this->getLhs());
+            Integer *offset = contentof->getOffset();
+            Integer *integer = dynamic_cast<Integer *>(this->getRhs());
+            code.setOpcode(0xc6);
+            code.setModRM(0x45);
+            code.set8bitsDisplacement(offset->getValue());
+            code.set8bitsImmediate(integer->getValue());
+            return code.getCode();
+        }
+    }
+
+    else if(this->is(t_Register, t_ContentOfLabel)){
         Register *reg = dynamic_cast<Register *>(this->getLhs());
         ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getRhs());
         if(reg->getName() == "eax") {
@@ -325,6 +338,32 @@ MachineCode RetInstruction::machineCode(){
         code.setOpcode(0xc2);
         code.set16bitsImmediate(integer->getValue());
         return code.getCode();
+    }
+    cout << "Unsupported format for " << this->getName() << endl;
+    return vector<uint8_t>({});
+}
+
+MachineCode IncInstruction::machineCode(){
+    InstructionCode code;
+    if(this->is(t_Register)) {
+        Register *reg = dynamic_cast<Register *>(this->getExp());
+        if(reg->getName() == "ebp"){
+            code.setOpcode(0x45);
+            return code.getCode();
+        }
+    }
+    cout << "Unsupported format for " << this->getName() << endl;
+    return vector<uint8_t>({});
+}
+
+MachineCode DecInstruction::machineCode(){
+    InstructionCode code;
+    if(this->is(t_Register)) {
+        Register *reg = dynamic_cast<Register *>(this->getExp());
+        if(reg->getName() == "ebp"){
+            code.setOpcode(0x4d);
+            return code.getCode();
+        }
     }
     cout << "Unsupported format for " << this->getName() << endl;
     return vector<uint8_t>({});

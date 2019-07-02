@@ -189,6 +189,8 @@ class UnaryInstruction : public Instruction {
     macro(Call, "call")\
     macro(Ret, "ret")\
     macro(Int, "int")\
+    macro(Inc, "inc")\
+    macro(Dec, "dec")\
 
 /* Macro that declares a class for an unary instruction */
 #define UnInstruction(prefix, name)\

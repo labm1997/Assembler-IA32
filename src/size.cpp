@@ -31,25 +31,31 @@ uint32_t CmpInstruction::size(){
 }
 
 uint32_t MovInstruction::size(){
-    if(this->is(t_Register, t_ContentOfLabel)){
+    if(this->indirectAccessSize == "byte"){
+        if(this->is(t_ContentOfRegister, t_Integer)){
+            return 4;
+        }
+    }
+
+    else if(this->is(t_Register, t_ContentOfLabel)){
         Register *reg = dynamic_cast<Register *>(this->getLhs());
         if(reg->getName() == "eax") return 5;
         if(reg->getName() == "ebx") return 6;
     }
 
-    if(this->is(t_Register, t_ContentOfRegister)){
+    else if(this->is(t_Register, t_ContentOfRegister)){
         Register *reg = dynamic_cast<Register *>(this->getLhs());
         if((reg->getName() == "ecx" || reg->getName() == "edx"))
             return 3;
     }
 
-    if(this->is(t_ContentOfLabel, t_Register)){
+    else if(this->is(t_ContentOfLabel, t_Register)){
         Register *reg = dynamic_cast<Register *>(this->getRhs());
         if(reg->getName() == "eax") return 5;
         if(reg->getName() == "ebx") return 6;
     }
 
-    if(this->is(t_Register, t_Integer)) return 5;
+    else if(this->is(t_Register, t_Integer)) return 5;
 
     else if(this->is(t_Register, t_Register)) return 2;
 
@@ -127,6 +133,18 @@ uint32_t PopInstruction::size(){
 
 uint32_t RetInstruction::size(){
     if(this->is(t_Integer)) return 3;
+    cout << "Unsupported format for " << this->getName() << endl;
+    return 0;
+}
+
+uint32_t IncInstruction::size(){
+    if(this->is(t_Register)) return 1;
+    cout << "Unsupported format for " << this->getName() << endl;
+    return 0;
+}
+
+uint32_t DecInstruction::size(){
+    if(this->is(t_Register)) return 1;
     cout << "Unsupported format for " << this->getName() << endl;
     return 0;
 }

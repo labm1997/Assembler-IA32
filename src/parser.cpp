@@ -150,6 +150,7 @@ AtomicExpression *Parser::matchAtomicExpression(string expstr, SymbolTable &symb
 
 AccessSize Parser::matchAccessSize(string asstr){
     if(asstr == "dword") return "dword";
+    else if(asstr == "byte") return "byte";
     return "";
 }
 
