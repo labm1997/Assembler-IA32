@@ -34,6 +34,8 @@ class AddExpression : public Expression {
     AddExpression(AtomicExpression *, AtomicExpression *);
     void prettyPrinter();
     ExpressionType type() { return t_AddExpression; };
+    AtomicExpression *getLhs() { return lhs ; };
+    AtomicExpression *getRhs() { return rhs ; };
 };
 
 // Defines class for [Expression] on AT&T IA32 Assembly

@@ -1,9 +1,6 @@
 #include "statement.hpp"
 #include <iostream>
 
-uint32_t tc = 0;
-uint32_t dc = 0;
-
 Program::Program(StatementList statements, SymbolTable symbolTable) : statements(statements), symbolTable(symbolTable) {};
 
 string Program::getObjectCode(){
@@ -19,9 +16,9 @@ string Program::getObjectCode(){
 
     ObjectCode machineCode = this->secondPassage();
 
-    for(auto it = machineCode.getText()->begin() ; it != machineCode.getText()->end() ; ++it){
-        cout << hex << (int)(*it) << " ";
-    }
+    //for(auto it = machineCode.getText()->begin() ; it != machineCode.getText()->end() ; ++it){
+    //    cout << hex << (int)(*it) << " ";
+    //}
 
     //cout << machineCode.getText();
     //cout << machineCode.getData();
@@ -39,12 +36,14 @@ void Program::firstPassage(){
             if((*it)->getLabel() != nullptr){
                 (*it)->getLabel()->setAddress(textPosition);
             }
+            (*it)->setAddress(textPosition);
             textPosition += (*it)->size();
         }
         else if ((*it)->getSection() == "data"){
             if((*it)->getLabel() != nullptr){
                 (*it)->getLabel()->setAddress(dataPosition);
             }
+            (*it)->setAddress(dataPosition);
             dataPosition += (*it)->size();
         }
         else {
@@ -56,6 +55,8 @@ void Program::firstPassage(){
 ObjectCode Program::secondPassage(){
     MachineCode *text = new MachineCode;
     MachineCode *data = new MachineCode;
+    uint32_t tc = 0;
+    uint32_t dc = 0;
 
     for(auto it = this->statements.begin(); it != this->statements.end() ; ++it){
         if((*it) == nullptr) continue;
@@ -64,9 +65,29 @@ ObjectCode Program::secondPassage(){
 
         if((*it)->getSection() == "text"){
             text->insert(text->end(), code.begin(), code.end());
+
+            cout << hex << tc << "\t";
+            tc += (*it)->size();
+            for(auto it = code.begin() ; it != code.end() ; ++it){
+                cout << hex << (int)(*it) << " ";
+            }
+            cout << " \t ";
+            (*it)->prettyPrinter();
+            cout << endl;
+
         }
         else if ((*it)->getSection() == "data"){
             data->insert(data->end(), code.begin(), code.end());
+
+            cout << hex << dc << "\t";
+            dc += (*it)->size();
+            for(auto it = code.begin() ; it != code.end() ; ++it){
+                cout << hex << (int)(*it) << " ";
+            }
+            cout << " \t ";
+            (*it)->prettyPrinter();
+            cout << endl;
+
         }
         else {
             cout << "Unsupported section " << (*it)->getSection() << endl;
@@ -94,16 +115,13 @@ UnaryInstruction::UnaryInstruction(Label *label, AccessSize accessSize, Expressi
 }
 
 void Program::prettyPrinter(){
-    tc = 0;
-    dc = 0;
     for(auto it = this->statements.begin() ; it != this->statements.end() ; ++it){
         (*it)->prettyPrinter();
+        cout << endl;
     }
 }
 
 void UnaryInstruction::prettyPrinter(){
-    cout << hex << tc << "\t";
-    tc += this->size();
 
     if(this->label)
         cout << this->label->getName() << ": ";
@@ -117,13 +135,10 @@ void UnaryInstruction::prettyPrinter(){
         cout << " ";
         this->exp->prettyPrinter();
     }
-    cout << endl;
 
 }
 
 void BinaryInstruction::prettyPrinter(){
-    cout << hex << tc << "\t";
-    tc += this->size();
 
     if(this->label)
         cout << this->label->getName() << ": ";
@@ -143,13 +158,10 @@ void BinaryInstruction::prettyPrinter(){
         this->rhs->prettyPrinter();
     }
 
-    cout << endl;
 
 }
 
 void DeclareStatement::prettyPrinter(){
-    cout << hex << dc << "\t";
-    dc += this->size();
 
     if(this->label){
         this->label->prettyPrinter();
@@ -163,5 +175,4 @@ void DeclareStatement::prettyPrinter(){
         if(it+1 != this->data.end()) cout << ",";
     }
 
-    cout << endl;
 }
