@@ -17,6 +17,7 @@ class Parser {
     static Integer *matchInteger(string);
     static Label *matchLabel(string, SymbolTable&);
     static LabelAdd *matchLabelAdd(string, SymbolTable&);
+    static bool matchSectionText(string);
 
     static vector<int32_t> splitToIntegers(string, char);
 

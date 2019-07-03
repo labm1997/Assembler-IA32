@@ -7,13 +7,21 @@ Program *Parser::parser(ifstream *input){
     SymbolTable symbolTable;
     list<Statement *> statements;
     string line;
+    uint8_t sectionTextCounter = 0;
 
     for(int lineNumber = 1 ; getline(*input, line) ; lineNumber++){
+
+        if(Parser::matchSectionText(line)){
+            sectionTextCounter++;
+            continue;
+        }
 
         // Try to match instruction
         Instruction *lineInstruction;
         lineInstruction = Parser::matchInstruction(line, symbolTable);
         if(lineInstruction != nullptr){
+            // Assembly only first text section
+            if(sectionTextCounter > 1) lineInstruction->setNotAssemble();
             statements.push_back(lineInstruction);
             continue;
         }
@@ -22,11 +30,13 @@ Program *Parser::parser(ifstream *input){
         DeclareStatement *lineDeclaration;
         lineDeclaration = Parser::matchDeclaration(line, symbolTable);
         if(lineDeclaration != nullptr){
+            if(sectionTextCounter > 1) lineDeclaration->setNotAssemble();
             statements.push_back(lineDeclaration);
             continue;
         }
 
-        cout << "Unsupported statement: " << line << endl;
+
+        else cout << "Unsupported statement: " << line << endl;
 
     }
 
@@ -41,6 +51,11 @@ vector<int32_t> Parser::splitToIntegers(string line, char delimiter){
         ret.push_back(atoi(token.c_str()));
     }
     return ret;
+}
+
+bool Parser::matchSectionText(string line){
+    if(line == "section .text") return true;
+    return false;
 }
 
 DeclareStatement *Parser::matchDeclaration(string line, SymbolTable &symbolTable){
@@ -79,7 +94,7 @@ Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
 
             #define MatchBinInstruction(prefix, name)\
             if(instruction == name){\
-                return new prefix##Instruction(label, accessSize, lhs, rhs);\
+                return new prefix##Instruction(label, accessSize, lhs, rhs, line);\
             }
             BinExpander(MatchBinInstruction)
         }
@@ -88,7 +103,7 @@ Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
         else {
             #define MatchUnInstruction(prefix, name)\
             if(instruction == name){\
-                return new prefix##Instruction(label, accessSize, lhs);\
+                return new prefix##Instruction(label, accessSize, lhs, line);\
             }
             UnExpander(MatchUnInstruction)
         }
@@ -119,7 +134,7 @@ Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
 }
 
 LabelAdd *Parser::matchLabelAdd(string expstr, SymbolTable &symbolTable){
-    regex re("^(\\w*)(?:\\+(\\w*))$");
+    regex re("^(\\w*)(?:(\\+\\w*))$");
     smatch match;
 
     if(regex_search(expstr, match, re)){
@@ -155,7 +170,7 @@ AccessSize Parser::matchAccessSize(string asstr){
 }
 
 ContentOfLabel *Parser::matchContentOfLabel(string cofstr, SymbolTable &symbolTable){
-    regex re("^\\[(\\w*)(?:\\+(\\w*))?\\]$");
+    regex re("^\\[(\\w*)(?:(\\+\\w*))?\\]$");
     smatch match;
 
     if(regex_search(cofstr, match, re)){
@@ -169,7 +184,7 @@ ContentOfLabel *Parser::matchContentOfLabel(string cofstr, SymbolTable &symbolTa
 }
 
 ContentOfRegister *Parser::matchContentOfRegister(string cofstr){
-    regex re("^\\[(\\w*)(?:\\+(\\w*))?\\]$");
+    regex re("^\\[(\\w*)(?:(\\+\\w*))?\\]$");
     smatch match;
 
     if(regex_search(cofstr, match, re)){

@@ -298,6 +298,10 @@ MachineCode CallInstruction::machineCode(){
     if(this->is(t_Label)){
         Label *label = dynamic_cast<Label *>(this->getExp());
         code.setOpcode(0xe8);
+        cout << "for label " << label->getName() << endl;
+        cout << "not biased " << label->getNotBiasedAddress() << endl;
+        cout << "this address " << this->getAddress() << endl;
+        cout << "this size " << this->size() << endl;
         code.setImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }

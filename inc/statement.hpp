@@ -100,6 +100,7 @@ class Statement {
     protected:
     Label *label;
     uint32_t address;
+    bool toAssemble = true;
 
     public:
     virtual MachineCode machineCode() = 0;
@@ -109,6 +110,8 @@ class Statement {
     void setAddress(uint32_t address) { this->address = address; };
     virtual string getSection() = 0;
     virtual uint32_t size() = 0;
+    void setNotAssemble(){ this->toAssemble = false; };
+    bool assemblable(){ return this->toAssemble; };
 };
 
 typedef list<Statement *> StatementList;
@@ -163,8 +166,9 @@ class Program {
 class UnaryInstruction : public Instruction {
     protected:
     Expression *exp;
+    string line;
     public:
-    UnaryInstruction(Label *, AccessSize, Expression *);
+    UnaryInstruction(Label *, AccessSize, Expression *, string line);
     virtual MachineCode machineCode() = 0;
     void prettyPrinter();
     virtual string getName() = 0;
@@ -208,8 +212,9 @@ UnExpander(UnInstruction);
 class BinaryInstruction : public Instruction {
     protected:
     Expression *lhs, *rhs;
+    string line;
     public:
-    BinaryInstruction(Label *, AccessSize, Expression *, Expression *);
+    BinaryInstruction(Label *, AccessSize, Expression *, Expression *, string line);
     virtual MachineCode machineCode() = 0;
     void prettyPrinter();
     virtual string getName() = 0;
