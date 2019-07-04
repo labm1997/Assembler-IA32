@@ -155,7 +155,7 @@ Expression *Parser::matchExpression(string expstr, SymbolTable &symbolTable){
 }
 
 LabelAdd *Parser::matchLabelAdd(string expstr, SymbolTable &symbolTable){
-    regex re("^(\\w*)(?:(\\+\\w*))$");
+    regex re("^(\\w*)(?:\\+(\\w*))$");
     smatch match;
 
     if(regex_search(expstr, match, re)){
@@ -191,7 +191,7 @@ AccessSize Parser::matchAccessSize(string asstr){
 }
 
 ContentOfLabel *Parser::matchContentOfLabel(string cofstr, SymbolTable &symbolTable){
-    regex re("^\\[(\\w*)(?:(\\+\\w*))?\\]$");
+    regex re("^\\[(\\w*)(?:\\+(\\w*))?\\]$");
     smatch match;
 
     if(regex_search(cofstr, match, re)){
@@ -205,7 +205,7 @@ ContentOfLabel *Parser::matchContentOfLabel(string cofstr, SymbolTable &symbolTa
 }
 
 ContentOfRegister *Parser::matchContentOfRegister(string cofstr){
-    regex re("^\\[(\\w*)(?:(\\+\\w*))?\\]$");
+    regex re("^\\[(\\w*)(?:\\+(\\w*))?\\]$");
     smatch match;
 
     if(regex_search(cofstr, match, re)){
