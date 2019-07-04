@@ -10,7 +10,7 @@ Matrícula | Nome
 ### Requisitos
 
 - Para compilar é necessário make e g++
-- Também é necessário ter os cabeçalhos da biblioteca elfio no diretório /usr/include/elfio
+- Também é necessário ter os cabeçalhos da biblioteca elfio no diretório /`usr/include/elfio`
 - Foi usado padrão c++11
 
 ### Compilação
