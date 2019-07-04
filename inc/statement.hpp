@@ -163,6 +163,14 @@ class Program {
 
 };
 
+class CdqInstruction : public Instruction {
+    public:
+    MachineCode machineCode();
+    void prettyPrinter();
+    string getName() { return "cdq"; };
+    uint32_t size();
+};
+
 class UnaryInstruction : public Instruction {
     protected:
     Expression *exp;
@@ -183,7 +191,7 @@ class UnaryInstruction : public Instruction {
 /* Macro that expands a given macro for all unary instructions */
 #define UnExpander(macro)\
     macro(Mult, "mul")\
-    macro(Div, "div")\
+    macro(Idiv, "idiv")\
     macro(Jmp, "jmp")\
     macro(Jl, "jl")\
     macro(Jg, "jg")\

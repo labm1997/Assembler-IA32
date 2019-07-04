@@ -1,4 +1,5 @@
 #include "statement.hpp"
+#include "log.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -33,7 +34,7 @@ MachineCode AddInstruction::machineCode(){
         code.set8bitsImmediate((uint8_t)value);
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -51,7 +52,7 @@ MachineCode SubInstruction::machineCode(){
         }
 
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -67,7 +68,7 @@ MachineCode ShlInstruction::machineCode(){
             return code.getCode();
         }
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -83,7 +84,7 @@ MachineCode CmpInstruction::machineCode(){
             return code.getCode();
         }
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -185,7 +186,7 @@ MachineCode MovInstruction::machineCode(){
         }
     }
 
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -199,20 +200,20 @@ MachineCode MultInstruction::machineCode(){
         return code.getCode();
     }
 
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
-MachineCode DivInstruction::machineCode(){
+MachineCode IdivInstruction::machineCode(){
     InstructionCode code;
     if(this->is(t_ContentOfLabel)) {
         ContentOfLabel *contentof = dynamic_cast<ContentOfLabel *>(this->getExp());
         code.setOpcode(0xf7);
-        code.setModRM(0x35);
+        code.setModRM(0x3d);
         code.setDisplacement(contentof->getAddress());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -225,7 +226,7 @@ MachineCode JmpInstruction::machineCode(){
         code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -237,7 +238,7 @@ MachineCode JlInstruction::machineCode(){
         code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -249,7 +250,7 @@ MachineCode JgInstruction::machineCode(){
         code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -261,7 +262,7 @@ MachineCode JeInstruction::machineCode(){
         code.set8bitsImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -289,7 +290,7 @@ MachineCode PushInstruction::machineCode(){
     if(this->is(t_Register)) {
         return vector<uint8_t>({0x55});
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -298,14 +299,10 @@ MachineCode CallInstruction::machineCode(){
     if(this->is(t_Label)){
         Label *label = dynamic_cast<Label *>(this->getExp());
         code.setOpcode(0xe8);
-        cout << "for label " << label->getName() << endl;
-        cout << "not biased " << label->getNotBiasedAddress() << endl;
-        cout << "this address " << this->getAddress() << endl;
-        cout << "this size " << this->size() << endl;
         code.setImmediate(label->getNotBiasedAddress()-this->getAddress()-this->size());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -317,7 +314,7 @@ MachineCode IntInstruction::machineCode(){
         code.set8bitsImmediate(integer->getValue());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -329,9 +326,9 @@ MachineCode PopInstruction::machineCode(){
             code.setOpcode(0x5d);
             return code.getCode();
         }
-        cout << "Unsupported register " << reg->getName() << endl;
+        error("Unsupported register " + reg->getName());
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -343,7 +340,7 @@ MachineCode RetInstruction::machineCode(){
         code.set16bitsImmediate(integer->getValue());
         return code.getCode();
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -356,7 +353,7 @@ MachineCode IncInstruction::machineCode(){
             return code.getCode();
         }
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
 }
 
@@ -369,6 +366,12 @@ MachineCode DecInstruction::machineCode(){
             return code.getCode();
         }
     }
-    cout << "Unsupported format for " << this->getName() << endl;
+    error("Unsupported format for " + this->getName() + " instruction: \"" + this->line + "\"");
     return vector<uint8_t>({});
+}
+
+MachineCode CdqInstruction::machineCode(){
+    InstructionCode code;
+    code.setOpcode(0x99);
+    return code.getCode();
 }

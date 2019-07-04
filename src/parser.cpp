@@ -2,6 +2,7 @@
 #include <iostream>
 #include <set>
 #include "parser.hpp"
+#include "log.hpp"
 
 Program *Parser::parser(ifstream *input){
     SymbolTable symbolTable;
@@ -13,6 +14,10 @@ Program *Parser::parser(ifstream *input){
 
         if(Parser::matchSectionText(line)){
             sectionTextCounter++;
+            continue;
+        }
+
+        if(Parser::matchSectionData(line) || Parser::matchGlobalStart(line)){
             continue;
         }
 
@@ -36,7 +41,7 @@ Program *Parser::parser(ifstream *input){
         }
 
 
-        else cout << "Unsupported statement: " << line << endl;
+        if(sectionTextCounter <= 1) warn("Ignoring statement: " + line);
 
     }
 
@@ -58,6 +63,16 @@ bool Parser::matchSectionText(string line){
     return false;
 }
 
+bool Parser::matchSectionData(string line){
+    if(line == "section .data") return true;
+    return false;
+}
+
+bool Parser::matchGlobalStart(string line){
+    if(line == "global _start") return true;
+    return false;
+}
+
 DeclareStatement *Parser::matchDeclaration(string line, SymbolTable &symbolTable){
     regex re("(?:(\\w*):\\s)?dd (\\d*(?:,\\s?\\d*)*)");
     smatch match;
@@ -71,7 +86,7 @@ DeclareStatement *Parser::matchDeclaration(string line, SymbolTable &symbolTable
 }
 
 Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
-    regex binre("(?:(\\w*):\\s)?(\\w*) (?:(\\w*)\\s)?(\\[?\\w*(?:\\+\\w*)?\\]?)(?:,(\\[?\\w*(?:\\+\\w*)?\\]?))?");
+    regex binre("(?:(\\w*):\\s)?(\\w*)(?: (dword))?(?: (\\[?\\w*(?:\\+\\w*)?\\]?))?(?:,(\\[?\\w*(?:\\+\\w*)?\\]?))?");
     smatch match;
 
     // Try to parse a binary expression
@@ -84,6 +99,12 @@ Instruction *Parser::matchInstruction(string line, SymbolTable &symbolTable){
 
         // Instruction mnemonic
         string instruction = match.str(2);
+
+        // Match cdq
+        if(instruction == "cdq"){
+            return new CdqInstruction;
+        }
+
 
         // LHS
         Expression *lhs = Parser::matchExpression(match.str(4), symbolTable);

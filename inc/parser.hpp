@@ -18,6 +18,8 @@ class Parser {
     static Label *matchLabel(string, SymbolTable&);
     static LabelAdd *matchLabelAdd(string, SymbolTable&);
     static bool matchSectionText(string);
+    static bool matchSectionData(string);
+    static bool matchGlobalStart(string);
 
     static vector<int32_t> splitToIntegers(string, char);
 
