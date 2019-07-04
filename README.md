@@ -28,3 +28,11 @@ A saída será o executável `output`
 ### Endereço de entrypoint
 
 A depender de seu computador e sistema operacional o executável pode apresentar falha de segmentação por estar utilizando endereços para o início da seção de texto ou de dados incorreta, caso isso aconteça altere as macros `START_TEXT_ADDRESS` e `START_DATA_ADDRESS` no arquivo `inc/statement.hpp` para os valores adequados.
+
+### Arquivo de teste
+
+O arquivo `test/teste.s` é saída do Tradutor-IA32 e pode ser usado como teste do Assembler-IA32. Dado que já compilou o montador faça:
+
+`./assembler test/teste.s`
+`chmod +x output`
+`./output`
